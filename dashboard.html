@@ -265,10 +265,16 @@
         });
 
         async function loadUsers(searchQuery = '') {
+            usersList.innerHTML = ''; // Clear existing list FIRST
+
+            if (!searchQuery) {
+                // If no search query, clear the list and do not fetch/display any users.
+                return;
+            }
+
             try {
                 const response = await fetch(`/users/${userId}`);
                 const data = await response.json();
-                usersList.innerHTML = ''; // Clear existing list
 
                 const currentUserFriends = await getFriendsListForFiltering();
                 const currentUserOutgoingRequests = await getOutgoingRequestsListForFiltering();
@@ -278,14 +284,9 @@
                     if (user.id === userId) return;
 
                     // Filter by search query if provided
-                    if (searchQuery && !user.username.toLowerCase().includes(searchQuery.toLowerCase())) {
-                        return;
+                    if (!user.username.toLowerCase().includes(searchQuery.toLowerCase())) {
+                        return; // Skip if it doesn't match search
                     }
-                    // ONLY display users if a search query is present
-                    if (!searchQuery) {
-                        return; // Do not display users if no search query
-                    }
-
 
                     const li = document.createElement('li');
                     li.className = 'user-item';
@@ -498,16 +499,16 @@
                 console.error('Error removing friend:', error);
                 alert('An error occurred.');
             }
+        
         }
-
         // Search functionality
         searchUserInput.addEventListener('input', () => {
-    const searchQuery = searchUserInput.value.trim(); // Get value and trim whitespace
-    if (searchQuery === '') {
-        usersList.innerHTML = ''; // Clear the list if search bar is empty
-    }
-    loadUsers(searchQuery); // Always call loadUsers, it will handle filtering
-});
+            const searchQuery = searchUserInput.value.trim(); // Get value and trim whitespace
+            if (searchQuery === '') {
+                usersList.innerHTML = ''; // Clear the list if search bar is empty
+            }
+            loadUsers(searchQuery); // Always call loadUsers, it will handle filtering
+        })
 
     </script>
 </body>

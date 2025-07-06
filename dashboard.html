@@ -502,8 +502,12 @@
 
         // Search functionality
         searchUserInput.addEventListener('input', () => {
-            loadUsers(searchUserInput.value);
-        });
+    const searchQuery = searchUserInput.value.trim(); // Get value and trim whitespace
+    if (searchQuery === '') {
+        usersList.innerHTML = ''; // Clear the list if search bar is empty
+    }
+    loadUsers(searchQuery); // Always call loadUsers, it will handle filtering
+});
 
     </script>
 </body>

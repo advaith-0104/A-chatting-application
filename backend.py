@@ -5,11 +5,9 @@ from datetime import datetime, timezone
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import sys
-
-# Import Firebase Admin SDK components
 import firebase_admin
 from firebase_admin import credentials, firestore, auth
-from firebase_admin.firestore import Timestamp
+from google.cloud.firestore import Timestamp
 
 # --- Firebase Initialization ---
 # For Render deployment, the service account key content will be provided

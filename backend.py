@@ -7,6 +7,7 @@ from flask_cors import CORS
 import sys
 import firebase_admin
 from firebase_admin import credentials, firestore, auth
+from google.cloud.firestore_v1.types import Timestamp # Correct Timestamp import
 
 # Firebase Initialization
 FIREBASE_SERVICE_ACCOUNT_KEY_CONTENT = os.environ.get('FIREBASE_SERVICE_ACCOUNT_KEY_CONTENT')
@@ -17,7 +18,7 @@ else:
     try:
         cred = credentials.Certificate(json.loads(FIREBASE_SERVICE_ACCOUNT_KEY_CONTENT))
         firebase_admin.initialize_app(cred)
-        db = firestore.client() # Get a Firestore client
+        db = firestore.client()
         print("Firebase Admin SDK initialized successfully.")
     except Exception as e:
         print(f"Error initializing Firebase Admin SDK: {e}")
@@ -25,9 +26,8 @@ else:
 
 # Helper function to convert Firestore Timestamp objects to datetime objects
 def convert_firestore_timestamp(obj):
-    # This checks if the object is an instance of the Firestore Timestamp class
-    if isinstance(obj, type(db.timestamp(0,0))):
-        return obj.isoformat() # Convert to ISO 8601 string for frontend
+    if isinstance(obj, Timestamp): # Use the imported Timestamp type directly
+        return obj.isoformat()
     elif isinstance(obj, dict):
         return {k: convert_firestore_timestamp(v) for k, v in obj.items()}
     elif isinstance(obj, list):
@@ -36,8 +36,7 @@ def convert_firestore_timestamp(obj):
 
 # Flask Application Setup
 app = Flask(__name__)
-CORS(app) # Enable CORS for frontend communication during development
-
+CORS(app)
 
 # API Endpoints
 @app.route('/')

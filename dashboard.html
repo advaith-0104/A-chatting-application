@@ -200,11 +200,12 @@
                 </ul>
             </div>
 
+            <!-- The "Find New Friends" section is now just the search bar and results -->
             <div class="find-friends-section">
                 <h2 class="section-title">Find New Friends</h2>
                 <input type="text" id="searchUserInput" class="search-bar" placeholder="Search users by username...">
                 <ul id="usersList" class="user-list">
-                    <!-- Users will be loaded here -->
+                    <!-- Search results will be loaded here -->
                 </ul>
             </div>
         </div>
@@ -233,7 +234,8 @@
             window.location.href = '/';
         } else {
             welcomeMessage.textContent = `Welcome, ${username}!`;
-            loadUsers();
+            // Do NOT load all users initially. They will be loaded via search.
+            // loadUsers(); // REMOVED THIS LINE
             loadFriends();
             loadFriendRequests();
         }
@@ -279,16 +281,21 @@
                     if (searchQuery && !user.username.toLowerCase().includes(searchQuery.toLowerCase())) {
                         return;
                     }
+                    // ONLY display users if a search query is present
+                    if (!searchQuery) {
+                        return; // Do not display users if no search query
+                    }
+
 
                     const li = document.createElement('li');
                     li.className = 'user-item';
                     li.innerHTML = `
                         <span class="username">${user.username}</span>
                         <div>
-                            ${currentUserFriends.includes(user.id) ? 
-                                `<button class="action-button remove-button" data-user-id="${user.id}">Remove Friend</button>` : 
-                                (currentUserOutgoingRequests.includes(user.id) ? 
-                                    `<span class="outgoing-request-info">Request Sent</span>` : 
+                            ${currentUserFriends.includes(user.id) ?
+                                `<button class="action-button remove-button" data-user-id="${user.id}">Remove Friend</button>` :
+                                (currentUserOutgoingRequests.includes(user.id) ?
+                                    `<span class="outgoing-request-info">Request Sent</span>` :
                                     `<button class="action-button add-button" data-user-id="${user.id}">Add Friend</button>`
                                 )
                             }
@@ -416,7 +423,7 @@
                 const data = await response.json();
                 if (response.ok) {
                     alert(data.message);
-                    loadUsers(); // Reload users to update button status
+                    loadUsers(searchUserInput.value); // Reload users to update button status, keeping search query
                     loadFriendRequests(); // Reload requests to show outgoing
                 } else {
                     alert(data.message || 'Failed to send friend request.');
@@ -440,7 +447,7 @@
                     alert(data.message);
                     loadFriendRequests(); // Reload requests to remove accepted
                     loadFriends(); // Reload friends to show new friend
-                    loadUsers(); // Reload users to update button status
+                    loadUsers(searchUserInput.value); // Reload users to update button status, keeping search query
                 } else {
                     alert(data.message || 'Failed to accept friend request.');
                 }
@@ -483,7 +490,7 @@
                 if (response.ok) {
                     alert(data.message);
                     loadFriends(); // Reload friends to remove friend
-                    loadUsers(); // Reload users to update button status
+                    loadUsers(searchUserInput.value); // Reload users to update button status, keeping search query
                 } else {
                     alert(data.message || 'Failed to remove friend.');
                 }

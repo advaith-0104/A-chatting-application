@@ -7,6 +7,7 @@ from flask_cors import CORS
 import sys
 import firebase_admin
 from firebase_admin import credentials, firestore, auth
+
 # Firebase Initialization
 FIREBASE_SERVICE_ACCOUNT_KEY_CONTENT = os.environ.get('FIREBASE_SERVICE_ACCOUNT_KEY_CONTENT')
 
@@ -22,8 +23,9 @@ else:
         print(f"Error initializing Firebase Admin SDK: {e}")
         print("Please ensure FIREBASE_SERVICE_ACCOUNT_KEY_CONTENT is valid JSON.")
 
-# Helper function to convert Firestore Timestamp objects to datetime objects
+# Helper function to convert Firestore Timestamp objects to datetime objects using duck typing
 def convert_firestore_timestamp(obj):
+    # Check if the object has an 'isoformat' method, which Timestamp objects do
     if hasattr(obj, 'isoformat') and callable(getattr(obj, 'isoformat')):
         return obj.isoformat()
     elif isinstance(obj, dict):

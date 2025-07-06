@@ -171,11 +171,11 @@
 
         // Redirect to login if essential params are missing
         if (!user1Id || !user2Id || !user1Username || !user2Username) {
-            window.location.href = '/';
+            window.location.href = '/'; // Use relative URL
         }
 
         backButton.addEventListener('click', () => {
-            window.location.href = '/dashboard.html';
+            window.location.href = '/dashboard.html'; // Use relative URL
         });
 
         sendMessageButton.addEventListener('click', sendMessage);
@@ -187,7 +187,7 @@
 
         async function fetchChatHistory() {
             try {
-                const response = await fetch(`/chat_history/${user1Id}/${user2Id}`);
+                const response = await fetch(`/chat_history/${user1Id}/${user2Id}`); // Relative path
                 const messages = await response.json();
                 chatMessagesDiv.innerHTML = ''; // Clear existing messages
 
@@ -222,7 +222,7 @@
             if (messageText === '') return;
 
             try {
-                const response = await fetch('/send_message', {
+                const response = await fetch('/send_message', { // Relative path
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({

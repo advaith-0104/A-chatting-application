@@ -236,8 +236,7 @@
     </div>
 
     <script>
-        const API_BASE_URL = 'https://chatting-app-e4if.onrender.com';
-        // Changed from sessionStorage to localStorage
+        // Removed API_BASE_URL as all paths will be relative
         const loggedInUserId = localStorage.getItem('loggedInUserId');
         const loggedInUsername = localStorage.getItem('loggedInUsername');
 
@@ -248,7 +247,7 @@
 
         // Redirect to login if not authenticated
         if (!loggedInUserId || !loggedInUsername) {
-            window.location.href = `${API_BASE_URL}/index.html`; // Use absolute URL
+            window.location.href = '/'; // Use relative URL
         } else {
             document.getElementById('welcomeMessage').textContent = `Welcome, ${loggedInUsername}!`;
             loadDashboardData();
@@ -285,7 +284,7 @@
          */
         async function loadFriends() {
             try {
-                const response = await fetch(`${API_BASE_URL}/friends/${loggedInUserId}`);
+                const response = await fetch(`/friends/${loggedInUserId}`); // Relative path
                 const data = await response.json();
                 const friendsList = document.getElementById('friendsList');
                 friendsList.innerHTML = ''; // Clear existing list
@@ -319,7 +318,7 @@
          */
         async function loadFriendRequests() {
             try {
-                const response = await fetch(`${API_BASE_URL}/friend_requests/${loggedInUserId}`);
+                const response = await fetch(`/friend_requests/${loggedInUserId}`); // Relative path
                 const data = await response.json();
                 const friendRequestsList = document.getElementById('friendRequestsList');
                 friendRequestsList.innerHTML = ''; // Clear existing list
@@ -369,7 +368,7 @@
          */
         async function loadAllUsersForSearch() {
             try {
-                const response = await fetch(`${API_BASE_URL}/users/${loggedInUserId}`);
+                const response = await fetch(`/users/${loggedInUserId}`); // Relative path
                 const data = await response.json();
                 
                 // Filter out self, existing friends, and users with pending/received requests
@@ -430,7 +429,7 @@
                 return;
             }
             try {
-                const response = await fetch(`${API_BASE_URL}/send_friend_request`, {
+                const response = await fetch(`/send_friend_request`, { // Relative path
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -461,7 +460,7 @@
          */
         async function acceptFriendRequest(senderId) {
             try {
-                const response = await fetch(`${API_BASE_URL}/accept_friend_request`, {
+                const response = await fetch(`/accept_friend_request`, { // Relative path
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -490,7 +489,7 @@
          */
         async function declineFriendRequest(senderId) {
             try {
-                const response = await fetch(`${API_BASE_URL}/decline_friend_request`, {
+                const response = await fetch(`/decline_friend_request`, { // Relative path
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -524,7 +523,7 @@
                 return;
             }
             try {
-                const response = await fetch(`${API_BASE_URL}/remove_friend`, {
+                const response = await fetch(`/remove_friend`, { // Relative path
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -554,10 +553,9 @@
          * @param {string} friendUsername - The username of the friend to chat with.
          */
         function startChat(friendId, friendUsername) {
-            // Changed from sessionStorage to localStorage
             localStorage.setItem('chattingWithId', friendId);
             localStorage.setItem('chattingWithUsername', friendUsername);
-            window.location.href = `${API_BASE_URL}/chat.html`; // Use absolute URL
+            window.location.href = `/chat.html`; // Use relative URL
         }
 
         /**
@@ -565,7 +563,7 @@
          */
         async function logout() {
             try {
-                const response = await fetch(`${API_BASE_URL}/logout`, {
+                const response = await fetch(`/logout`, { // Relative path
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -574,9 +572,8 @@
                 });
                 const data = await response.json();
                 if (response.ok) {
-                    // Changed from sessionStorage.clear() to localStorage.clear()
                     localStorage.clear(); // Clear all localStorage
-                    window.location.href = `${API_BASE_URL}/index.html`; // Use absolute URL
+                    window.location.href = `/`; // Use relative URL
                 } else {
                     displayMessage(data.message, 'error');
                 }

@@ -7,8 +7,6 @@ from flask_cors import CORS
 import sys
 import firebase_admin
 from firebase_admin import credentials, firestore, auth
-from google.cloud.firestore_v1.types import Timestamp # Correct Timestamp import
-
 # Firebase Initialization
 FIREBASE_SERVICE_ACCOUNT_KEY_CONTENT = os.environ.get('FIREBASE_SERVICE_ACCOUNT_KEY_CONTENT')
 

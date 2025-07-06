@@ -24,6 +24,7 @@
             width: 100%;
             max-width: 450px;
             text-align: center;
+            display: none; /* ADDED: Hide by default to prevent flash */
         }
         .auth-container h1 {
             font-size: 2.25rem;
@@ -158,6 +159,7 @@
         const passwordInput = document.getElementById('password');
         const confirmPasswordInput = document.getElementById('confirmPassword');
         const stayLoggedInCheckbox = document.getElementById('stayLoggedIn');
+        const authContainer = document.querySelector('.auth-container'); // ADDED: Get the auth container element
 
         let isLoginMode = true; // Default to login mode
 
@@ -181,6 +183,9 @@
             if (userId && username) {
                 // If user data exists, redirect to dashboard
                 window.location.href = '/dashboard.html'; // Use relative URL
+            } else {
+                // If user is NOT logged in, show the authentication container
+                authContainer.style.display = 'block'; // ADDED: Show the container
             }
         };
 

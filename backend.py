@@ -26,7 +26,7 @@ else:
 
 # Helper function to convert Firestore Timestamp objects to datetime objects
 def convert_firestore_timestamp(obj):
-    if isinstance(obj, Timestamp): # Use the imported Timestamp type directly
+    if hasattr(obj, 'isoformat') and callable(getattr(obj, 'isoformat')):
         return obj.isoformat()
     elif isinstance(obj, dict):
         return {k: convert_firestore_timestamp(v) for k, v in obj.items()}

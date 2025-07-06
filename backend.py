@@ -7,7 +7,7 @@ from flask_cors import CORS
 import sys
 import firebase_admin
 from firebase_admin import credentials, firestore, auth
-from google.cloud.firestore import Timestamp
+from google.cloud.firestore_v1.base_timestamp import Timestamp # <-- THIS IS THE EXACT LINE TO CHANGE.
 
 # --- Firebase Initialization ---
 # For Render deployment, the service account key content will be provided

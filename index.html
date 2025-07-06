@@ -24,7 +24,7 @@
             width: 100%;
             max-width: 450px;
             text-align: center;
-            display: none; /* ADDED: Hide by default to prevent flash */
+            display: none; /* Hide by default to prevent flash */
         }
         .auth-container h1 {
             font-size: 2.25rem;
@@ -159,7 +159,7 @@
         const passwordInput = document.getElementById('password');
         const confirmPasswordInput = document.getElementById('confirmPassword');
         const stayLoggedInCheckbox = document.getElementById('stayLoggedIn');
-        const authContainer = document.querySelector('.auth-container'); // ADDED: Get the auth container element
+        const authContainer = document.querySelector('.auth-container'); 
 
         let isLoginMode = true; // Default to login mode
 
@@ -170,8 +170,8 @@
             messageBox.style.display = 'block';
         }
 
-        // Check if user is already logged in (from previous session or local storage)
-        window.onload = function() {
+        // Helper function to get user session from storage
+        function getUserSession() {
             let userId = localStorage.getItem('userId');
             let username = localStorage.getItem('username');
 
@@ -179,13 +179,19 @@
                 userId = sessionStorage.getItem('userId');
                 username = sessionStorage.getItem('username');
             }
+            return { userId, username };
+        }
+
+        // Check if user is already logged in (from previous session or local storage)
+        window.onload = function() {
+            const { userId, username } = getUserSession();
             
             if (userId && username) {
                 // If user data exists, redirect to dashboard
                 window.location.href = '/dashboard.html'; // Use relative URL
             } else {
                 // If user is NOT logged in, show the authentication container
-                authContainer.style.display = 'block'; // ADDED: Show the container
+                authContainer.style.display = 'block'; // Show the container
             }
         };
 
@@ -211,6 +217,7 @@
             }
             messageBox.style.display = 'none'; // Hide messages on mode switch
             authForm.reset(); // Clear form fields
+            authContainer.style.display = 'block'; // Ensure form is visible after mode switch
         });
 
         authForm.addEventListener('submit', async (e) => {
@@ -273,6 +280,7 @@
                         usernameInput.removeAttribute('required');
                         confirmPasswordInput.removeAttribute('required');
                         authForm.reset(); // Clear form fields
+                        authContainer.style.display = 'block'; // Ensure form is visible after registration
                     }
                 } else {
                     showMessage(data.message || 'An error occurred.', 'error');

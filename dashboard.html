@@ -236,9 +236,19 @@
     </div>
 
     <script>
-        // Removed API_BASE_URL as all paths will be relative
-        const loggedInUserId = localStorage.getItem('loggedInUserId');
-        const loggedInUsername = localStorage.getItem('loggedInUsername');
+        // Helper function to get user session from storage
+        function getUserSession() {
+            let userId = localStorage.getItem('userId');
+            let username = localStorage.getItem('username');
+
+            if (!userId || !username) { // If not in localStorage, check sessionStorage
+                userId = sessionStorage.getItem('userId');
+                username = sessionStorage.getItem('username');
+            }
+            return { userId, username };
+        }
+
+        const { userId: loggedInUserId, username: loggedInUsername } = getUserSession(); // Get from function
 
         let allOtherUsers = []; // Store all other users for client-side filtering
         let currentFriends = new Set(); // To store IDs of current friends
@@ -573,6 +583,7 @@
                 const data = await response.json();
                 if (response.ok) {
                     localStorage.clear(); // Clear all localStorage
+                    sessionStorage.clear(); // ADDED: Clear sessionStorage as well for robustness
                     window.location.href = `/`; // Use relative URL
                 } else {
                     displayMessage(data.message, 'error');

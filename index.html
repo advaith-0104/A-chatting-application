@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FriendChatter - Login/Register</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .auth-container {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+        }
+        .auth-container h1 {
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 1.5rem;
+        }
+        .form-group {
+            margin-bottom: 1.25rem;
+            text-align: left;
+        }
+        .form-group label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 0.5rem;
+        }
+        .form-group input[type="text"],
+        .form-group input[type="email"],
+        .form-group input[type="password"] {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.2s ease;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+        }
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        .checkbox-group input[type="checkbox"] {
+            margin-right: 0.5rem;
+        }
+        .auth-button {
+            width: 100%;
+            padding: 1rem;
+            background-color: #4f46e5;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+        .auth-button:hover {
+            background-color: #4338ca;
+            transform: translateY(-1px);
+        }
+        .auth-button:active {
+            transform: translateY(0);
+        }
+        .toggle-link {
+            display: block;
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+            color: #666;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        .message-box {
+            background-color: #ffe0b2; /* Light orange */
+            color: #e65100; /* Dark orange */
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-weight: 600;
+            text-align: center;
+            display: none; /* Hidden by default */
+        }
+        .message-box.error {
+            background-color: #ffcdd2; /* Light red */
+            color: #d32f2f; /* Dark red */
+        }
+        .message-box.success {
+            background-color: #c8e6c9; /* Light green */
+            color: #388e3c; /* Dark green */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+    <div class="auth-container">
+        <div id="messageBox" class="message-box"></div>
+
+        <h1 id="authTitle">Login</h1>
+
+        <form id="authForm">
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group" id="usernameGroup" style="display: none;">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username">
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <div class="form-group" id="confirmPasswordGroup" style="display: none;">
+                <label for="confirmPassword">Confirm Password</label>
+                <input type="password" id="confirmPassword" name="confirm_password">
+            </div>
+            <div class="checkbox-group">
+                <input type="checkbox" id="stayLoggedIn" name="stay_logged_in">
+                <label for="stayLoggedIn">Stay Logged In</label>
+            </div>
+            <button type="submit" id="authButton" class="auth-button">Login</button>
+        </form>
+
+        <a href="#" id="toggleAuth" class="toggle-link">Don't have an account? Register here.</a>
+    </div>
+
+    <script>
+        const authTitle = document.getElementById('authTitle');
+        const authForm = document.getElementById('authForm');
+        const usernameGroup = document.getElementById('usernameGroup');
+        const confirmPasswordGroup = document.getElementById('confirmPasswordGroup');
+        const authButton = document.getElementById('authButton');
+        const toggleAuth = document.getElementById('toggleAuth');
+        const messageBox = document.getElementById('messageBox');
+        const emailInput = document.getElementById('email');
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const confirmPasswordInput = document.getElementById('confirmPassword');
+        const stayLoggedInCheckbox = document.getElementById('stayLoggedIn');
+
+        let isLoginMode = true; // Default to login mode
+
+        // Function to show messages
+        function showMessage(message, type = 'info') {
+            messageBox.textContent = message;
+            messageBox.className = `message-box ${type}`;
+            messageBox.style.display = 'block';
+        }
+
+        // Check if user is already logged in (from previous session or local storage)
+        window.onload = function() {
+            let userId = localStorage.getItem('userId');
+            let username = localStorage.getItem('username');
+
+            if (!userId || !username) { // If not in localStorage, check sessionStorage
+                userId = sessionStorage.getItem('userId');
+                username = sessionStorage.getItem('username');
+            }
+            
+            if (userId && username) {
+                // If user data exists, redirect to dashboard
+                window.location.href = '/dashboard.html';
+            }
+        };
+
+        toggleAuth.addEventListener('click', (e) => {
+            e.preventDefault();
+            isLoginMode = !isLoginMode;
+            if (isLoginMode) {
+                authTitle.textContent = 'Login';
+                usernameGroup.style.display = 'none';
+                confirmPasswordGroup.style.display = 'none';
+                authButton.textContent = 'Login';
+                toggleAuth.textContent = "Don't have an account? Register here.";
+                usernameInput.removeAttribute('required');
+                confirmPasswordInput.removeAttribute('required');
+            } else {
+                authTitle.textContent = 'Register';
+                usernameGroup.style.display = 'block';
+                confirmPasswordGroup.style.display = 'block';
+                authButton.textContent = 'Register';
+                toggleAuth.textContent = 'Already have an account? Login here.';
+                usernameInput.setAttribute('required', 'true');
+                confirmPasswordInput.setAttribute('required', 'true');
+            }
+            messageBox.style.display = 'none'; // Hide messages on mode switch
+            authForm.reset(); // Clear form fields
+        });
+
+        authForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            messageBox.style.display = 'none'; // Hide previous messages
+
+            const email = emailInput.value;
+            const password = passwordInput.value;
+            const username = usernameInput.value;
+            const confirmPassword = confirmPasswordInput.value;
+            const stayLoggedIn = stayLoggedInCheckbox.checked; // Get checkbox state
+
+            let url = '';
+            let body = {};
+
+            if (isLoginMode) {
+                url = '/login';
+                body = { email, password };
+            } else {
+                url = '/register';
+                body = { email, username, password, confirm_password: confirmPassword };
+            }
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showMessage(data.message, 'success');
+                    if (isLoginMode) {
+                        // Store user ID and username based on 'stayLoggedIn' checkbox
+                        if (stayLoggedIn) {
+                            localStorage.setItem('userId', data.user_id);
+                            localStorage.setItem('username', data.username);
+                            sessionStorage.removeItem('userId'); // Clear sessionStorage if localStorage is used
+                            sessionStorage.removeItem('username');
+                        } else {
+                            sessionStorage.setItem('userId', data.user_id);
+                            sessionStorage.setItem('username', data.username);
+                            localStorage.removeItem('userId'); // Clear localStorage if sessionStorage is used
+                            localStorage.removeItem('username');
+                        }
+                        // Redirect to dashboard after a short delay to show success message
+                        setTimeout(() => {
+                            window.location.href = '/dashboard.html';
+                        }, 1000);
+                    } else {
+                        // After successful registration, switch to login mode
+                        isLoginMode = true;
+                        authTitle.textContent = 'Login';
+                        usernameGroup.style.display = 'none';
+                        confirmPasswordGroup.style.display = 'none';
+                        authButton.textContent = 'Login';
+                        toggleAuth.textContent = "Don't have an account? Register here.";
+                        usernameInput.removeAttribute('required');
+                        confirmPasswordInput.removeAttribute('required');
+                        authForm.reset(); // Clear form fields
+                    }
+                } else {
+                    showMessage(data.message || 'An error occurred.', 'error');
+                }
+            } catch (error) {
+                console.error('Fetch error:', error);
+                showMessage('Network error or server unreachable.', 'error');
+            }
+        });
+    </script>
+</body>
+</html>

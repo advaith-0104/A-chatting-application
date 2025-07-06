@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FriendChatter - Chat</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .chat-container {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 700px;
+            height: 90vh; /* Adjusted for better chat experience */
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .chat-header {
+            background-color: #4f46e5;
+            color: white;
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+        }
+        .chat-messages {
+            flex-grow: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .message {
+            max-width: 70%;
+            padding: 0.75rem 1rem;
+            border-radius: 10px;
+            word-wrap: break-word;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+        .message.sent {
+            align-self: flex-end;
+            background-color: #4f46e5;
+            color: white;
+            border-bottom-right-radius: 2px;
+        }
+        .message.received {
+            align-self: flex-start;
+            background-color: #e2e8f0;
+            color: #333;
+            border-bottom-left-radius: 2px;
+        }
+        .message-timestamp {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: 0.25rem;
+            text-align: right;
+        }
+        .message.received .message-timestamp {
+            color: #666;
+            text-align: left;
+        }
+        .chat-input-area {
+            display: flex;
+            padding: 1.5rem;
+            border-top: 1px solid #e0e0e0;
+            gap: 1rem;
+            background-color: #f9f9f9;
+            border-bottom-left-radius: 12px;
+            border-bottom-right-radius: 12px;
+        }
+        .chat-input {
+            flex-grow: 1;
+            padding: 0.75rem 1rem;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 1rem;
+            resize: none;
+            min-height: 40px;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+        .send-button {
+            background-color: #22c55e;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .send-button:hover {
+            background-color: #16a34a;
+        }
+        .back-button {
+            background-color: #6b7280;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .back-button:hover {
+            background-color: #4b5563;
+        }
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .chat-container {
+                width: 95%;
+                height: 95vh;
+                margin: 1rem;
+            }
+            .chat-header {
+                padding: 1rem;
+            }
+            .chat-messages {
+                padding: 1rem;
+            }
+            .chat-input-area {
+                padding: 1rem;
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+            .send-button {
+                width: 100%;
+                padding: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+    <div class="chat-container">
+        <div class="chat-header">
+            <button id="backButton" class="back-button">Back to Dashboard</button>
+            <h1 id="chatPartnerName" class="text-2xl font-bold"></h1>
+        </div>
+
+        <div id="chatMessages" class="chat-messages">
+            <!-- Messages will be loaded here -->
+        </div>
+
+        <div class="chat-input-area">
+            <textarea id="messageInput" class="chat-input" placeholder="Type a message..." rows="1"></textarea>
+            <button id="sendMessageButton" class="send-button">Send</button>
+        </div>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const user1Id = urlParams.get('user1Id');
+        const user2Id = urlParams.get('user2Id');
+        const user1Username = urlParams.get('user1Username');
+        const user2Username = urlParams.get('user2Username');
+
+        const chatPartnerName = document.getElementById('chatPartnerName');
+        const chatMessages = document.getElementById('chatMessages');
+        const messageInput = document.getElementById('messageInput');
+        const sendMessageButton = document.getElementById('sendMessageButton');
+        const backButton = document.getElementById('backButton');
+
+        chatPartnerName.textContent = user2Username;
+
+        // Redirect if essential params are missing
+        if (!user1Id || !user2Id || !user1Username || !user2Username) {
+            window.location.href = '/';
+        }
+
+        backButton.addEventListener('click', () => {
+            window.location.href = '/dashboard.html';
+        });
+
+        sendMessageButton.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault(); // Prevent new line
+                sendMessage();
+            }
+        });
+
+        async function fetchChatHistory() {
+            try {
+                const response = await fetch(`/chat_history/${user1Id}/${user2Id}`);
+                const messages = await response.json();
+
+                chatMessages.innerHTML = ''; // Clear existing messages
+                messages.forEach(msg => {
+                    const messageDiv = document.createElement('div');
+                    messageDiv.className = `message ${msg.sender_id === user1Id ? 'sent' : 'received'}`;
+                    
+                    const messageText = document.createElement('p');
+                    messageText.textContent = msg.message;
+                    messageDiv.appendChild(messageText);
+
+                    if (msg.timestamp) {
+                        const timestampSpan = document.createElement('span');
+                        // Format timestamp for display (it will already be ISO string from backend)
+                        const date = new Date(msg.timestamp);
+                        timestampSpan.textContent = date.toLocaleString(); // Localized date and time
+                        timestampSpan.className = 'message-timestamp';
+                        messageDiv.appendChild(timestampSpan);
+                    }
+                    
+                    chatMessages.appendChild(messageDiv);
+                });
+                chatMessages.scrollTop = chatMessages.scrollHeight; // Scroll to bottom
+            } catch (error) {
+                console.error('Error fetching chat history:', error);
+                // Optionally display a user-friendly message
+            }
+        }
+
+        async function sendMessage() {
+            const messageText = messageInput.value.trim();
+            if (messageText === '') return;
+
+            try {
+                const response = await fetch('/send_message', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        sender_id: user1Id,
+                        receiver_id: user2Id,
+                        message: messageText
+                    })
+                });
+
+                if (response.ok) {
+                    messageInput.value = ''; // Clear input
+                    fetchChatHistory(); // Reload messages to show the new one
+                } else {
+                    const data = await response.json();
+                    alert(data.message || 'Failed to send message.');
+                }
+            } catch (error) {
+                console.error('Error sending message:', error);
+                alert('An error occurred while sending message.');
+            }
+        }
+
+        // Initial load of chat history
+        fetchChatHistory();
+
+        // Optional: Periodically fetch chat history to see new messages
+        // Removed: setInterval(fetchChatHistory, 3000); // Fetch every 3 seconds
+    </script>
+</body>
+</html>

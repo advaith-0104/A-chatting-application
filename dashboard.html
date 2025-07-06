@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FriendChatter - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            min-height: 80vh;
+        }
+        .header {
+            background-color: #4f46e5;
+            color: white;
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+        }
+        .main-content {
+            display: flex;
+            flex-direction: column; /* Changed to column for stacked sections */
+            flex-grow: 1;
+            padding: 1.5rem;
+            gap: 2rem; /* Spacing between sections */
+        }
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 0.5rem;
+        }
+        .user-list, .friend-list, .request-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            max-height: 300px; /* Limit height for scrollability */
+            overflow-y: auto;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 0.5rem;
+        }
+        .user-item, .friend-item, .request-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .user-item:last-child, .friend-item:last-child, .request-item:last-child {
+            border-bottom: none;
+        }
+        .user-item:hover, .friend-item:hover, .request-item:hover {
+            background-color: #f0f0f0;
+        }
+        .username {
+            font-weight: 600;
+            color: #555;
+        }
+        .action-button {
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .add-button {
+            background-color: #4f46e5;
+            color: white;
+        }
+        .add-button:hover {
+            background-color: #4338ca;
+        }
+        .chat-button {
+            background-color: #22c55e;
+            color: white;
+        }
+        .chat-button:hover {
+            background-color: #16a34a;
+        }
+        .accept-button {
+            background-color: #22c55e;
+            color: white;
+            margin-right: 0.5rem;
+        }
+        .accept-button:hover {
+            background-color: #16a34a;
+        }
+        .decline-button {
+            background-color: #ef4444;
+            color: white;
+        }
+        .decline-button:hover {
+            background-color: #dc2626;
+        }
+        .remove-button {
+            background-color: #ef4444;
+            color: white;
+        }
+        .remove-button:hover {
+            background-color: #dc2626;
+        }
+        .logout-button {
+            background-color: #f43f5e;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            margin-top: auto; /* Pushes button to the bottom */
+        }
+        .logout-button:hover {
+            background-color: #e11d48;
+        }
+        .search-bar {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+        }
+        .request-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        .outgoing-request-info {
+            font-size: 0.875rem;
+            color: #666;
+            font-style: italic;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                min-height: 95vh;
+                margin: 1rem;
+            }
+            .main-content {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+    <div class="container">
+        <div class="header">
+            <h1 class="text-2xl font-bold">FriendChatter</h1>
+            <div class="flex items-center space-x-4">
+                <span id="welcomeMessage" class="text-lg font-medium"></span>
+                <button id="logoutButton" class="logout-button">Logout</button>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="friends-section">
+                <h2 class="section-title">Your Friends</h2>
+                <ul id="friendsList" class="friend-list">
+                    <!-- Friends will be loaded here -->
+                </ul>
+            </div>
+
+            <div class="requests-section">
+                <h2 class="section-title">Friend Requests</h2>
+                <ul id="incomingRequestsList" class="request-list">
+                    <!-- Incoming requests will be loaded here -->
+                </ul>
+                <h3 class="mt-4 text-md font-semibold text-gray-700">Outgoing Requests</h3>
+                <ul id="outgoingRequestsList" class="request-list">
+                    <!-- Outgoing requests will be loaded here -->
+                </ul>
+            </div>
+
+            <div class="find-friends-section">
+                <h2 class="section-title">Find New Friends</h2>
+                <input type="text" id="searchUserInput" class="search-bar" placeholder="Search users by username...">
+                <ul id="usersList" class="user-list">
+                    <!-- Users will be loaded here -->
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let userId = localStorage.getItem('userId');
+        let username = localStorage.getItem('username');
+
+        // Fallback to sessionStorage if localStorage is empty
+        if (!userId || !username) {
+            userId = sessionStorage.getItem('userId');
+            username = sessionStorage.getItem('username');
+        }
+
+        const welcomeMessage = document.getElementById('welcomeMessage');
+        const logoutButton = document.getElementById('logoutButton');
+        const usersList = document.getElementById('usersList');
+        const friendsList = document.getElementById('friendsList');
+        const incomingRequestsList = document.getElementById('incomingRequestsList');
+        const outgoingRequestsList = document.getElementById('outgoingRequestsList');
+        const searchUserInput = document.getElementById('searchUserInput');
+
+        // Redirect to login if not authenticated
+        if (!userId || !username) {
+            window.location.href = '/';
+        } else {
+            welcomeMessage.textContent = `Welcome, ${username}!`;
+            loadUsers();
+            loadFriends();
+            loadFriendRequests();
+        }
+
+        logoutButton.addEventListener('click', async () => {
+            try {
+                const response = await fetch('/logout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: userId })
+                });
+
+                if (response.ok) {
+                    sessionStorage.removeItem('userId');
+                    sessionStorage.removeItem('username');
+                    localStorage.removeItem('userId'); // Clear localStorage as well
+                    localStorage.removeItem('username');
+                    window.location.href = '/';
+                } else {
+                    const data = await response.json();
+                    alert(data.message || 'Logout failed.');
+                }
+            } catch (error) {
+                console.error('Error during logout:', error);
+                alert('An error occurred during logout.');
+            }
+        });
+
+        async function loadUsers(searchQuery = '') {
+            try {
+                const response = await fetch(`/users/${userId}`);
+                const data = await response.json();
+                usersList.innerHTML = ''; // Clear existing list
+
+                const currentUserFriends = await getFriendsListForFiltering();
+                const currentUserOutgoingRequests = await getOutgoingRequestsListForFiltering();
+
+                data.users.forEach(user => {
+                    // Filter out current user
+                    if (user.id === userId) return;
+
+                    // Filter by search query if provided
+                    if (searchQuery && !user.username.toLowerCase().includes(searchQuery.toLowerCase())) {
+                        return;
+                    }
+
+                    const li = document.createElement('li');
+                    li.className = 'user-item';
+                    li.innerHTML = `
+                        <span class="username">${user.username}</span>
+                        <div>
+                            ${currentUserFriends.includes(user.id) ? 
+                                `<button class="action-button remove-button" data-user-id="${user.id}">Remove Friend</button>` : 
+                                (currentUserOutgoingRequests.includes(user.id) ? 
+                                    `<span class="outgoing-request-info">Request Sent</span>` : 
+                                    `<button class="action-button add-button" data-user-id="${user.id}">Add Friend</button>`
+                                )
+                            }
+                        </div>
+                    `;
+                    usersList.appendChild(li);
+                });
+
+                // Add event listeners for new buttons
+                usersList.querySelectorAll('.add-button').forEach(button => {
+                    button.addEventListener('click', (e) => sendFriendRequest(e.target.dataset.userId));
+                });
+                usersList.querySelectorAll('.remove-button').forEach(button => {
+                    button.addEventListener('click', (e) => removeFriend(e.target.dataset.userId));
+                });
+
+            } catch (error) {
+                console.error('Error loading users:', error);
+                alert('Failed to load users.');
+            }
+        }
+
+        async function getFriendsListForFiltering() {
+            try {
+                const response = await fetch(`/friends/${userId}`);
+                const data = await response.json();
+                return data.friends.map(friend => friend.id);
+            } catch (error) {
+                console.error('Error fetching friends for filtering:', error);
+                return [];
+            }
+        }
+
+        async function getOutgoingRequestsListForFiltering() {
+            try {
+                const response = await fetch(`/friend_requests/${userId}`);
+                const data = await response.json();
+                return data.outgoing.map(req => req.receiver_id);
+            } catch (error) {
+                console.error('Error fetching outgoing requests for filtering:', error);
+                return [];
+            }
+        }
+
+        async function loadFriends() {
+            try {
+                const response = await fetch(`/friends/${userId}`);
+                const data = await response.json();
+                friendsList.innerHTML = ''; // Clear existing list
+                data.friends.forEach(friend => {
+                    const li = document.createElement('li');
+                    li.className = 'friend-item';
+                    li.innerHTML = `
+                        <span class="username">${friend.username}</span>
+                        <button class="action-button chat-button" data-friend-id="${friend.id}" data-friend-username="${friend.username}">Chat</button>
+                    `;
+                    friendsList.appendChild(li);
+                });
+
+                friendsList.querySelectorAll('.chat-button').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const friendId = e.target.dataset.friendId;
+                        const friendUsername = e.target.dataset.friendUsername;
+                        // Redirect to chat page with friend's ID
+                        window.location.href = `/chat.html?user1Id=${userId}&user2Id=${friendId}&user1Username=${username}&user2Username=${friendUsername}`;
+                    });
+                });
+            } catch (error) {
+                console.error('Error loading friends:', error);
+                alert('Failed to load friends.');
+            }
+        }
+
+        async function loadFriendRequests() {
+            try {
+                const response = await fetch(`/friend_requests/${userId}`);
+                const data = await response.json();
+
+                incomingRequestsList.innerHTML = '';
+                data.requests.forEach(request => {
+                    const li = document.createElement('li');
+                    li.className = 'request-item';
+                    li.innerHTML = `
+                        <span class="username">${request.sender_username}</span>
+                        <div class="request-actions">
+                            <button class="action-button accept-button" data-requester-id="${request.sender_id}">Accept</button>
+                            <button class="action-button decline-button" data-requester-id="${request.sender_id}">Decline</button>
+                        </div>
+                    `;
+                    incomingRequestsList.appendChild(li);
+                });
+
+                outgoingRequestsList.innerHTML = '';
+                data.outgoing.forEach(request => {
+                    const li = document.createElement('li');
+                    li.className = 'request-item';
+                    li.innerHTML = `
+                        <span class="username">${request.receiver_username}</span>
+                        <span class="outgoing-request-info">Pending</span>
+                    `;
+                    outgoingRequestsList.appendChild(li);
+                });
+
+                incomingRequestsList.querySelectorAll('.accept-button').forEach(button => {
+                    button.addEventListener('click', (e) => acceptFriendRequest(e.target.dataset.requesterId));
+                });
+                incomingRequestsList.querySelectorAll('.decline-button').forEach(button => {
+                    button.addEventListener('click', (e) => declineFriendRequest(e.target.dataset.requesterId));
+                });
+
+            } catch (error) {
+                console.error('Error loading friend requests:', error);
+                alert('Failed to load friend requests.');
+            }
+        }
+
+        async function sendFriendRequest(receiverId) {
+            try {
+                const response = await fetch('/send_friend_request', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sender_id: userId, receiver_id: receiverId })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    alert(data.message);
+                    loadUsers(); // Reload users to update button status
+                    loadFriendRequests(); // Reload requests to show outgoing
+                } else {
+                    alert(data.message || 'Failed to send friend request.');
+                }
+            } catch (error) {
+                console.error('Error sending friend request:', error);
+                alert('An error occurred.');
+            }
+        }
+
+        async function acceptFriendRequest(requesterId) {
+            try {
+                const response = await fetch('/accept_friend_request', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ requester_id: requesterId, accepter_id: userId })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    alert(data.message);
+                    loadFriendRequests(); // Reload requests to remove accepted
+                    loadFriends(); // Reload friends to show new friend
+                    loadUsers(); // Reload users to update button status
+                } else {
+                    alert(data.message || 'Failed to accept friend request.');
+                }
+            } catch (error) {
+                console.error('Error accepting friend request:', error);
+                alert('An error occurred.');
+            }
+        }
+
+        async function declineFriendRequest(requesterId) {
+            try {
+                const response = await fetch('/decline_friend_request', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ requester_id: requesterId, decliner_id: userId })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    alert(data.message);
+                    loadFriendRequests(); // Reload requests to remove declined
+                } else {
+                    alert(data.message || 'Failed to decline friend request.');
+                }
+            } catch (error) {
+                console.error('Error declining friend request:', error);
+                alert('An error occurred.');
+            }
+        }
+
+        async function removeFriend(friendId) {
+            try {
+                const response = await fetch('/remove_friend', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: userId, friend_id: friendId })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    alert(data.message);
+                    loadFriends(); // Reload friends to remove friend
+                    loadUsers(); // Reload users to update button status
+                } else {
+                    alert(data.message || 'Failed to remove friend.');
+                }
+            } catch (error) {
+                console.error('Error removing friend:', error);
+                alert('An error occurred.');
+            }
+        }
+
+        // Search functionality
+        searchUserInput.addEventListener('input', () => {
+            loadUsers(searchUserInput.value);
+        });
+
+    </script>
+</body>
+</html>

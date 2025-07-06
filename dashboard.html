@@ -563,9 +563,8 @@
          * @param {string} friendUsername - The username of the friend to chat with.
          */
         function startChat(friendId, friendUsername) {
-            localStorage.setItem('chattingWithId', friendId);
-            localStorage.setItem('chattingWithUsername', friendUsername);
-            window.location.href = `/chat.html`; // Use relative URL
+            // Pass IDs and usernames as URL parameters
+            window.location.href = `/chat.html?user1Id=${loggedInUserId}&user2Id=${friendId}&user1Username=${loggedInUsername}&user2Username=${friendUsername}`;
         }
 
         /**
@@ -583,7 +582,7 @@
                 const data = await response.json();
                 if (response.ok) {
                     localStorage.clear(); // Clear all localStorage
-                    sessionStorage.clear(); // ADDED: Clear sessionStorage as well for robustness
+                    sessionStorage.clear(); // Clear sessionStorage as well for robustness
                     window.location.href = `/`; // Use relative URL
                 } else {
                     displayMessage(data.message, 'error');

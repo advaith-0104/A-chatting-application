@@ -155,12 +155,13 @@
     </div>
 
     <script>
-        debugger; // THIS IS THE ONLY DEBUGGER LINE HERE!
         const urlParams = new URLSearchParams(window.location.search);
         const user1Id = urlParams.get('user1Id');
         const user2Id = urlParams.get('user2Id');
         const user1Username = urlParams.get('user1Username');
         const user2Username = urlParams.get('user2Username');
+
+        debugger; // DEBUGGER IS NOW HERE!
 
         const chattingWithElement = document.getElementById('chattingWith');
         const chatMessagesDiv = document.getElementById('chatMessages');
